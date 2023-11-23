@@ -33,9 +33,9 @@ io.on("connection", async (socket) => {
       //obtener informacion de todos los conductores en la sala de conductores
       console.log(conductoresCercanos, cliente)
 
-      conductoresCercanos.forEach(({ idMongoDB }) => {
+      conductoresCercanos.forEach((data) => {
         //send to all conductores in the room
-        socket.to(idMongoDB).emit("message", "saaasdsdadsasaddsasdsdasadsa");
+        socket.to("CONDUCTORES").emit("message", data);
       }) 
     })
     
