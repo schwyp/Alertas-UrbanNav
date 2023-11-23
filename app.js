@@ -8,9 +8,11 @@ const io = new Server({
 });
 
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   const { idUsuario, tipoUsuario } = socket.handshake.query;
   // console.log(socket.handshake.query)
+
+
 
   if(tipoUsuario === 'CONDUCTOR'){
     console.log(`Conductor conectado ${idUsuario}`);
@@ -22,8 +24,21 @@ io.on("connection", (socket) => {
   }
 
   if(tipoUsuario === 'CLIENTE'){
-    console.log(`Conductor conectado ${idUsuario}`);
+    console.log(`Cliente conectado ${idUsuario}`);
     socket.join("CLIENTES");
+
+    socket.on("alertar-conductores" , (data) => {
+      const { conductoresCercanos, cliente } = data
+
+      //obtener informacion de todos los conductores en la sala de conductores
+      console.log(conductoresCercanos, cliente)
+
+      conductoresCercanos.forEach(({ idMongoDB }) => {
+        //send to all conductores in the room
+        socket.to(idMongoDB).emit("message", "saaasdsdadsasaddsasdsdasadsa");
+      }) 
+    })
+    
   }
 
   
@@ -33,7 +48,6 @@ io.on("connection", (socket) => {
     // Puedes realizar acciones adicionales cuando un usuario se desconecta
   });
   
-
   
   
 });
