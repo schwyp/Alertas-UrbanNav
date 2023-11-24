@@ -7,12 +7,16 @@ const io = new Server({
   }
 });
 
+const usuariosConectados = {}; // Objeto para mapear usuarioId a socket.id
 
 io.on("connection", async (socket) => {
   const { idUsuario, tipoUsuario } = socket.handshake.query;
-  // console.log(socket.handshake.query)
 
+  //si el idUsuario ya existe en el objeto usuariosConectados, entonces se elimina el socket.id anterior
+  //y se reemplaza por el nuevo
+    usuariosConectados[idUsuario] = socket.id;
 
+  // console.log(usuariosConectados)
 
   if(tipoUsuario === 'CONDUCTOR'){
     console.log(`Conductor conectado ${idUsuario}`);
@@ -27,15 +31,18 @@ io.on("connection", async (socket) => {
     console.log(`Cliente conectado ${idUsuario}`);
     socket.join("CLIENTES");
 
-    socket.on("alertar-conductores" , (data) => {
-      const { conductoresCercanos, cliente } = data
+    socket.on("alertar-conductores" , (info) => {
+      const { conductoresCercanos, cliente } = info
 
       //obtener informacion de todos los conductores en la sala de conductores
       console.log(conductoresCercanos, cliente)
 
       conductoresCercanos.forEach((data) => {
         //send to all conductores in the room
-        socket.to("CONDUCTORES").emit("message", data);
+        
+        console.log(data.idMongoDB, usuariosConectados[data.idMongoDB])
+        io.to(usuariosConectados[data.idMongoDB]).emit("nuevo-servicio", info);
+        // socket.to("CONDUCTORES").emit("message", data);
       }) 
     })
     
@@ -45,7 +52,7 @@ io.on("connection", async (socket) => {
   // Manejar el evento disconnect
   socket.on("disconnect", () => {
     console.log('usuario desconectado: ', idUsuario, ' tipo: ', tipoUsuario);
-    // Puedes realizar acciones adicionales cuando un usuario se desconecta
+    delete usuariosConectados[idUsuario];
   });
   
   
