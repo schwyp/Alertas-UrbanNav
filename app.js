@@ -41,7 +41,13 @@ io.on("connection", async (socket) => {
       io.to(socketIdCliente).emit("servicio-solicitud-de-conductor", info);
     })
 
-    
+    socket.on('llego-origen', (servicio) => {
+      console.log('llego-origen')
+      const idCliente = servicio.idCliente
+      const socketIdCliente = usuariosConectados[idCliente]
+      console.log(socketIdCliente)
+      io.to(socketIdCliente).emit("llego-origen-conductor", servicio);
+    })
     
   }
 
@@ -50,6 +56,7 @@ io.on("connection", async (socket) => {
     socket.join("CLIENTES");
 
     socket.on("alertar-conductores" , (info) => {
+      console.log('ALERTAR CONDUCTORES')
       const { conductoresCercanos, cliente } = info
 
       //obtener informacion de todos los conductores en la sala de conductores
