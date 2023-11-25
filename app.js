@@ -23,7 +23,25 @@ io.on("connection", async (socket) => {
     socket.join("CONDUCTORES");
 
     //emit to conductores room a message
-    io.to("CONDUCTORES").emit("message", "Otro conductor se ha conectado");
+    // io.to("CONDUCTORES").emit("message", "Otro conductor se ha conectado");
+
+    socket.on("servicio-tomado", (id) => {
+
+      //send to all conductores in the room
+      socket.to("CONDUCTORES").emit("actualizacion-servicios", id);
+
+    })
+
+    socket.on('servicio-solicitud-a-cliente' , (info) => {
+      console.log('servico-solicitud-a-cliente')
+      console.log(info)
+      const idCliente = info.servicio.idCliente
+      const socketIdCliente = usuariosConectados[idCliente]
+      console.log(socketIdCliente)
+      io.to(socketIdCliente).emit("servicio-solicitud-de-conductor", info);
+    })
+
+    
     
   }
 
@@ -35,8 +53,6 @@ io.on("connection", async (socket) => {
       const { conductoresCercanos, cliente } = info
 
       //obtener informacion de todos los conductores en la sala de conductores
-      console.log(conductoresCercanos, cliente)
-
       conductoresCercanos.forEach((data) => {
         //send to all conductores in the room
         
@@ -44,6 +60,22 @@ io.on("connection", async (socket) => {
         io.to(usuariosConectados[data.idMongoDB]).emit("nuevo-servicio", info);
         // socket.to("CONDUCTORES").emit("message", data);
       }) 
+    })
+
+    socket.on('servicio-solicitud-cliente-aceptada' , (info) => {
+      console.log('servicio-solicitud-cliente-aceptada')
+      const idConductor = info.conductor.idMongoDB
+      const socketIdConductor = usuariosConectados[idConductor]
+      console.log(socketIdConductor)
+      io.to(socketIdConductor).emit("servicio-solicitud-aceptada", info);
+    })
+
+    socket.on('servicio-solicitud-cliente-rechazada' , (info) => {
+      console.log('servicio-solicitud-cliente-rechazada')
+      const idConductor = info.conductor.idMongoDB
+      const socketIdConductor = usuariosConectados[idConductor]
+      console.log(socketIdConductor)
+      io.to(socketIdConductor).emit("servicio-solicitud-rechazada", info);
     })
     
   }
