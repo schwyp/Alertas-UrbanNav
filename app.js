@@ -55,6 +55,17 @@ io.on("connection", async (socket) => {
     console.log(`Cliente conectado ${idUsuario}`);
     socket.join("CLIENTES");
 
+    socket.on('viaje-cancelado', (info) => {
+      console.log('viaje-cancelado')
+      console.log(info)
+      const idConductor = info.conductorId
+      const socketIdConductor = usuariosConectados[idConductor]
+      console.log(socketIdConductor)
+      console.log("IDE DEL CONDUCTOR", socketIdConductor)
+      io.to(socketIdConductor).emit("viaje-cancelado-cliente", info);
+    
+    })
+
     socket.on("alertar-conductores" , (info) => {
       console.log('ALERTAR CONDUCTORES')
       const { conductoresCercanos, cliente } = info
